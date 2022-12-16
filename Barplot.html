@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html lang="en">
+
+<head>
+    <title>Visualizations Using D3.js</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <!-- Load d3.js -->
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+
+    <style>
+        .navbar {
+            margin-bottom: 0;
+            border-radius: 0;
+        }
+        .row.content {
+            height: 1200px
+        }
+        .sidenav {
+            padding-top: 20px;
+            background-color: #f1f1f1;
+            height: 30%;
+            width: 100%;
+        }
+        footer {
+            background-color: #555;
+            color: lightblue;
+            padding: 15px;
+        }
+        @media screen and (max-width: 767px) {
+            .sidenav {
+                height: auto;
+                padding: 15px;
+            }
+
+            .row.content {
+                height: auto;
+            }
+        }
+
+        #mainWrapper {
+            height: auto;
+            width: 500px;
+        }
+
+        #selectionPane {
+            position: absolute;
+            top: 50px;
+            left: 300px;
+            height: 40px;
+            font-size: 18px;
+        }
+
+        .slice {
+            font-size: 12pt;
+            font-family: Verdana;
+            fill: white;
+            /*svg specific - instead of color*/
+            font-weight: bold;
+        }
+
+        .axis text {
+            font-family: Verdana;
+            font-size: 11px;
+        }
+
+        .title {
+            font-family: Verdana;
+            font-size: 15px;
+
+        }
+
+        .xAxis {
+            font-family: verdana;
+            font-size: 11px;
+            fill: black;
+        }
+
+        .yAxis {
+            font-family: verdana;
+            font-size: 11px;
+            fill: white;
+        }
+
+        table {
+            border-collapse: collapse;
+            border: 0px;
+            font-family: Verdana;
+            color: #5C5558;
+            font-size: 12px;
+            text-align: right;
+        }
+
+        td {
+            padding-left: 10px;
+        }
+
+    </style>
+
+</script>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">Visualization using D3.js</a>
+            </div>
+            <div class="collapse navbar-collapse" id="myNavbar">
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid text-center">
+        <div class="row content">
+            <div class="col-md-6 sidenav">
+                <p><b>Data Set Used</b></p>
+                <p>Dataset used: car_sales.csv</p>
+
+                <p><b>Representation of Individual Visualizations</b></p>
+                <p><b>Bar Plot</b></p>
+
+
+                <p><b>Explanation of Visualizations</b></p>
+                <p>The below bar chart represents the type of vehicles(x-axis) vs sales of vehicles (y-axis) </p>
+
+            </div>
+
+            <div class="col-sm-8 text-left">
+                <h3>Bar Chart using D3.js</h3>
+
+                <div id="mainWrapper">
+                    <div id="selectionPane ">
+                        <label><strong>Type:</strong></label>
+                        <select id="selectOrigin">
+                            <option value="allOrigin" selected>All Vehicles</option>
+                        </select>
+                    </div>
+                    <div id="my_dataviz">
+                        <!-- Add 2 buttons-->
+
+                    </div>
+                    <div id="my_dataviz_1"></div>
+
+                        <script>
+
+                            // set the dimensions and margins of the graph
+                            var margin = {top: 30, right: 30, bottom: 70, left: 60},
+                                width = 500 - margin.left - margin.right,
+                                height = 400 - margin.top - margin.bottom;
+
+                            // append the svg object to the body of the page
+                            var svg = d3.select("#my_dataviz")
+                              .append("svg")
+                                .attr("width", width + margin.left + margin.right)
+                                .attr("height", height + margin.top + margin.bottom)
+                              .append("g")
+                                .attr("transform",
+                                      "translate(" + margin.left + "," + margin.top + ")");
+
+                            // Parse the Data
+                            d3.csv("car_sales.csv", function(data) {
+                            var allGroup = d3.map(data, function (d) { return (d.Vehicle_type) }).keys()
+
+                            // add the options to the button
+                            d3.select("#selectOrigin")
+                                .selectAll('myOptions')
+                                .data(allGroup)
+                                .enter()
+                                .append('option')
+                                .text(function (d) { return "Vehicles of " + d + " Type"; }) // text showed in the menu
+                     //         .attr("Sales", function (d) { return d; }) // corresponding value
+
+
+                      // X axis
+                      var x = d3.scaleBand()
+                        .range([ 0, width ])
+                        .domain(data.map(function(d) { return d.Vehicle_type; }))
+                        .padding(0.2);
+                      svg.append("g")
+                        .attr("transform", "translate(0," + height + ")")
+                        .call(d3.axisBottom(x))
+                        .selectAll("text")
+                          .attr("transform", "translate(-10,0)rotate(-45)")
+                          .style("text-anchor", "end");
+
+                      // Add Y axis
+                      var y = d3.scaleLinear()
+                        .domain([0, 700])
+                        .range([ height,0]);
+                      svg.append("g")
+                        .call(d3.axisLeft(y));
+
+                      // Bars
+                      svg.selectAll("mybar")
+                        .data(data)
+                        .enter()
+                        .append("rect")
+                        .attr("x", function(d) { return x(d.Vehicle_type); })
+                        .attr("y", function(d) { return y(d.Sales); })
+                        .attr("width", x.bandwidth())
+                        .attr("height", function(d) { return height - y(d.Sales); })
+                        .attr("fill", "#69b3a2")
+                    })
+
+                    // Defining graph title and axis labels
+                            const xAxisLabel = "Type of Vehicles";
+                            const yAxisLabel = "Sales in Hundreds";
+                            const title = `Bar Chart showing ${yAxisLabel} vs ${xAxisLabel}`;
+
+                            //Create Title
+                            svg.append("text")
+                                .attr("x", width / 2)
+                                .attr("y", height / 60)
+                                .style("text-anchor", "middle")
+                                .text(title);
+
+                            //Create X axis label
+                            svg.append("text")
+                                .attr("x", width / 2)
+                                .attr("y", 270 + margin.bottom)
+                                .style("text-anchor", "middle")
+                                .text(xAxisLabel);
+
+                            //Create Y axis label
+                            svg.append("text")
+                                .attr("transform", "rotate(-90)")
+                                .attr("y", 0 - margin.left)
+                                .attr("x", 0 - (height / 2))
+                                .attr("dy", "1em")
+                                .style("text-anchor", "middle")
+                                .text(yAxisLabel);
+
+                            // X axis: scale and draw:
+                            var x = d3.scaleLinear()
+                                .domain([0, 10])
+                                .range([0, width]);
+                            svg.append("g")
+                                .attr("transform", "translate(0," + height + ")")
+                                .call(d3.axisBottom(x));
+
+                            // Y axis: initialization
+                            var y = d3.scaleLinear()
+                                .range([height, 0]);
+                            var yAxis = svg.append("g")
+
+
+            </script>
+<a href="index.html">
+      <button>Go Back</button>
+    </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
